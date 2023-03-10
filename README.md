@@ -2,7 +2,7 @@
 # Infinite Scroll
 ### Project Demo
 * Deployed on github page
-   https://s27840213.github.io/Collapse-Menu/
+   https://s27840213.github.io/Infinite-Scroll/
 
 <!-- GETTING STARTED -->
 ### How to run the project locally?
