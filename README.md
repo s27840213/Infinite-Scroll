@@ -1,24 +1,27 @@
-# infinite-scroll
+<!-- ABOUT THE PROJECT -->
+# Infinite Scroll
+### Project Demo
+* Deployed on github page
+   https://s27840213.github.io/Collapse-Menu/
 
-## Project setup
-```
-yarn install
-```
+<!-- GETTING STARTED -->
+### How to run the project locally?
+If you want to run the project locally, follow the bellow steps
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+* first clone the project 
+   ```
+   git clone https://github.com/s27840213/Infinite-Scroll.git
+  ```
+* install the dependencies
+  ```
+  npm install
+  ```
+* execute the project
+   ```sh
+  npm run serve
+  ```
 
-### Compiles and minifies for production
-```
-yarn build
-```
 
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Additional Info
+* The project connected the Github API to get the repositories list of certain user
+* The repo I used is from the user [Anthony Fu](https://github.com/antfu?tab=repositories)

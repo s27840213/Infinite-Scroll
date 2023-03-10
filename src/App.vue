@@ -1,6 +1,5 @@
 <template>
-  <div class="loading">
-    <span v-if="isLoading">Loading next page...</span>
+  <div class="error-msg">
     <span v-if="requestErrorMsg"> {{ requestErrorMsg }}...</span>
   </div>
   <div class="repo-container" ref="container" @scroll="handleScroll($event)">
@@ -10,6 +9,9 @@
     <template v-for="repo in repos" :key="repo.id">
       <RepoItem :repo="repo"></RepoItem>
     </template>
+    <div class="loading">
+      <span v-if="isLoading">Loading next page...</span>
+    </div>
   </div>
 </template>
 
@@ -18,6 +20,14 @@ import RepoItem from "@/components/RepoItem.vue";
 import type { IParsedLinkHeader, IRepo } from "@/interface";
 import { onMounted, reactive, ref } from "vue";
 
+/**
+ * @param repos - repos we get from the Github API
+ * @param isLoading - is loading the next page
+ * @param requestErrorMsg - error message from the request of the Github API
+ * @param repoOwner - owner of the repos
+ * @param container - the HTMLElement DOM Node of repo-container
+ * @param parsedLinkHeaderInfo - parsed link header info from the response of the Github API, may contain the pagination info(next,prev,first,last)
+ */
 const repos = ref([] as Array<IRepo>);
 const isLoading = ref(false);
 const requestErrorMsg = ref("");
@@ -51,15 +61,20 @@ const getRepos = async (url?: string) => {
 
     const json = await response.json();
     if (response.ok) {
+      if (requestErrorMsg.value !== "") {
+        requestErrorMsg.value = "";
+      }
+
+      // parse the link header info from the response of the Github API to get the pagination info
       const linkHeader = response.headers.get("Link");
       if (linkHeader) {
         Object.assign(parsedLinkHeaderInfo, parseLinkHeader(linkHeader));
       }
+
       repos.value.push(...json);
-      isLoading.value = false;
     } else {
+      // show the requrestErrorMsg
       requestErrorMsg.value = json.message;
-      console.log(json);
     }
     isLoading.value = false;
   } catch (error) {
@@ -69,11 +84,13 @@ const getRepos = async (url?: string) => {
 };
 
 const handleScroll = (event: Event) => {
+  // if we have no more next page or is loading the next page, we can just skip the following process
   if (!parsedLinkHeaderInfo.next && !isLoading.value) {
     return;
   }
   const { scrollTop, scrollHeight, clientHeight } = event.target as HTMLElement;
 
+  // if we scroll to the end of the repo-container, get the next page repos
   if (scrollTop + clientHeight >= scrollHeight) {
     getRepos(parsedLinkHeaderInfo.next?.url);
   }
@@ -81,10 +98,13 @@ const handleScroll = (event: Event) => {
 
 onMounted(async () => {
   await getRepos();
+  // if after getting the first page repos, we still have space to fill more repos(means no overflow) then send the API to get more repos
+  // until the repo-container have overflow (scrollHeight > clientHeight)
   while (
     parsedLinkHeaderInfo.next &&
     container.value?.scrollHeight === container.value?.clientHeight
   ) {
+    // I really need to use the getRepos function in the while loop, so I disable the following airbnb eslint rule
     // eslint-disable-next-line no-await-in-loop
     await getRepos(parsedLinkHeaderInfo.next.url);
   }
